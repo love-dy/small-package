@@ -1,4 +1,4 @@
-name: Sync packages
+name: Sync packages test
 
 on:
   push:
@@ -65,7 +65,7 @@ jobs:
         if git status --porcelain | grep .; then
           git add .
           git commit -am "update $(date '+%Y-%m-%d %H:%M:%S')"
-          git push --quiet "https://${{ secrets.ACCESS_TOKEN }}@github.com/kenzok8/small-package.git" HEAD:${{matrix.target}}
+          git push --quiet "https://${{ secrets.ACCESS_TOKEN }}@github.com/love-dy/small-package.git" HEAD:${{matrix.target}}
         else
           echo "nothing to commit"
           exit 0
