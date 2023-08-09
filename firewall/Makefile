@@ -13,9 +13,9 @@ PKG_RELEASE:=3
 
 PKG_SOURCE_PROTO:=git
 PKG_SOURCE_URL=$(PROJECT_GIT)/project/firewall3.git
-PKG_SOURCE_DATE:=2022-02-17
-PKG_SOURCE_VERSION:=4cd7d4f36bea731bf901cb067456f1d460294926
-PKG_MIRROR_HASH:=ce9e8ac1bcf22afbb0a80c3da1a8e8e887851299681097e3dfbfc347f2c4c80f
+PKG_SOURCE_DATE:=2018-08-13
+PKG_SOURCE_VERSION:=1c4d5bcd1137e61e91dca858fe33d76d7a1dc821
+PKG_MIRROR_HASH:=49f939877a734056455556c90b959c407fd2c4988dc5d86f62a8122ebd7b8899
 PKG_MAINTAINER:=Jo-Philipp Wich <jo@mein.io>
 PKG_LICENSE:=ISC
 
@@ -28,9 +28,7 @@ define Package/firewall
   SECTION:=net
   CATEGORY:=Base system
   TITLE:=OpenWrt C Firewall
-  DEPENDS:=+libubox +libubus +libuci +libip4tc +IPV6:libip6tc +libiptext +IPV6:libiptext6 +libxtables +kmod-ipt-core +kmod-ipt-conntrack +IPV6:kmod-nf-conntrack6 +kmod-ipt-nat
-  PROVIDES:=uci-firewall
-  CONFLICTS:=firewall4
+  DEPENDS:=+libubox +libubus +libuci +libip4tc +IPV6:libip6tc +libxtables +kmod-ipt-core +kmod-ipt-conntrack +IPV6:kmod-nf-conntrack6 +kmod-ipt-nat
 endef
 
 define Package/firewall/description
@@ -52,13 +50,13 @@ define Package/firewall/install
 	$(INSTALL_DIR) $(1)/etc/init.d
 	$(INSTALL_BIN) ./files/firewall.init $(1)/etc/init.d/firewall
 	$(INSTALL_DIR) $(1)/etc/hotplug.d/iface
-	$(INSTALL_CONF) ./files/firewall.hotplug $(1)/etc/hotplug.d/iface/20-firewall
+	$(INSTALL_DATA) ./files/firewall.hotplug $(1)/etc/hotplug.d/iface/20-firewall
 	$(INSTALL_DIR) $(1)/etc/config/
-	$(INSTALL_CONF) ./files/firewall.config $(1)/etc/config/firewall
+	$(INSTALL_DATA) ./files/firewall.config $(1)/etc/config/firewall
 	$(INSTALL_DIR) $(1)/etc/
-	$(INSTALL_CONF) ./files/firewall.user $(1)/etc/firewall.user
+	$(INSTALL_DATA) ./files/firewall.user $(1)/etc/firewall.user
 	$(INSTALL_DIR) $(1)/usr/share/fw3
-	$(INSTALL_CONF) $(PKG_BUILD_DIR)/helpers.conf $(1)/usr/share/fw3
+	$(INSTALL_DATA) $(PKG_BUILD_DIR)/helpers.conf $(1)/usr/share/fw3
 endef
 
 $(eval $(call BuildPackage,firewall))

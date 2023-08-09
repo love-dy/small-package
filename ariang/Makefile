@@ -1,46 +1,32 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=ariang
-PKG_VERSION:=1.3.2
-PKG_RELEASE:=$(AUTORELEASE)
+PKG_RELEASE:=1
 
-PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).zip
-PKG_SOURCE_URL:=https://github.com/mayswind/AriaNg/releases/download/$(PKG_VERSION)
-PKG_HASH:=2186dacf57c9d1650e00084c0454f2227e910f3203d89c6190f547b40cac7243
-UNPACK_CMD=unzip -q -d $(1) $(DL_DIR)/$(PKG_SOURCE)
+PKG_SOURCE_PROTO:=git
+PKG_SOURCE_URL:=https://github.com/mayswind/AriaNg-DailyBuild
+PKG_SOURCE_DATE:=2018-02-21
+PKG_SOURCE_VERSION:=f71a67cbb034aebcd076db3fadc1b9d8cdc470c7
+PKG_MIRROR_HASH:=13b07acbe29a68929295a82deb5a0122d8a56e328f783b6bc1efe9c72b99a702
 
-PKG_MAINTAINER:=Ansuel Smith <ansuelsmth@gmail.com>
 PKG_LICENSE:=MIT
 PKG_LICENSE_FILES:=LICENSE
+PKG_MAINTAINER:=Ansuel Smith <ansuelsmth@gmail.com>
 
 include $(INCLUDE_DIR)/package.mk
 
-define Package/ariang/default
+define Package/ariang
   SECTION:=net
   CATEGORY:=Network
   SUBMENU:=Download Manager
-  DEPENDS:=+aria2
-  TITLE:=AriaNg webui
-  URL:=https://ariang.mayswind.net
+  DEPENDS:=+uhttpd +aria2
+  TITLE:=AriaNg is a web frontend making aria2 easier to use.
+  URL:=https://github.com/mayswind/AriaNg
   PKGARCH:=all
 endef
 
 define Package/ariang/description
 	AriaNg is a web frontend making aria2 easier to use. AriaNg is written in pure html & javascript, thus it does not need any compilers or runtime environment.
-endef
-
-Package/ariang-nginx/description = $(Package/ariang/description)
-
-define Package/ariang
-  $(Package/ariang/default)
-  DEPENDS += +uhttpd
-  TITLE += for uhttpd webserver
-endef
-
-define Package/ariang-nginx
-  $(Package/ariang/default)
-  DEPENDS += +nginx
-  TITLE += for nginx webserver
 endef
 
 define Build/Compile
@@ -53,19 +39,10 @@ define Package/ariang/install
 	$(CP) \
 		$(PKG_BUILD_DIR)/{langs,css,js,fonts} \
 		$(PKG_BUILD_DIR)/index.html \
+		$(PKG_BUILD_DIR)/index.manifest \
 		$(PKG_BUILD_DIR)/LICENSE \
-		$(PKG_BUILD_DIR)/favicon.* \
-		$(PKG_BUILD_DIR)/robots.txt \
+		$(PKG_BUILD_DIR)/favicon.ico \
 		$(1)/www/ariang
 endef
 
-define Package/ariang-nginx/install
-	$(Package/ariang/install)
-	$(INSTALL_DIR) $(1)/etc/nginx/conf.d/
-	$(INSTALL_BIN) ./files/ariang.locations $(1)/etc/nginx/conf.d/
-	$(INSTALL_DIR) $(1)/etc/uci-defaults
-	$(INSTALL_BIN) ./files/80_ariang-nginx-support $(1)/etc/uci-defaults/80_ariang-nginx-support
-endef
-
 $(eval $(call BuildPackage,ariang))
-$(eval $(call BuildPackage,ariang-nginx))
