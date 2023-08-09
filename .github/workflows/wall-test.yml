@@ -3,7 +3,7 @@ name: Sync packages test
 on:
   push:
     paths:
-      - '.github/workflows/wall.yml'
+      - '.github/workflows/wall-test.yml'
       - '.github/diy/main.sh'
   schedule:
     - cron: 0 */8 * * *
