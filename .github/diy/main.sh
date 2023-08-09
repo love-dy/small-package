@@ -49,9 +49,6 @@ git clone --depth 1 https://github.com/esirplayground/LingTiGameAcc
 git clone --depth 1 https://github.com/esirplayground/luci-app-LingTiGameAcc
 git clone --depth 1 -b 18.06 https://github.com/jerrykuku/luci-theme-argon
 git clone --depth 1 -b 18.06 https://github.com/jerrykuku/luci-app-argon-config
-git clone --depth 1 https://github.com/jerrykuku/luci-app-vssr
-git clone --depth 1 https://github.com/jerrykuku/luci-app-ttnode
-git clone --depth 1 https://github.com/jerrykuku/luci-app-jd-dailybonus
 git clone --depth 1 https://github.com/jerrykuku/luci-app-go-aliyundrive-webdav
 git clone --depth 1 https://github.com/jerrykuku/lua-maxminddb
 git clone --depth 1 https://github.com/sirpdboy/luci-app-advanced
@@ -99,8 +96,7 @@ git_sparse_clone openwrt-18.06 "https://github.com/openwrt/packages" "22packages
 
 git_sparse_clone openwrt-18.06 "https://github.com/openwrt/luci" "opluci" applications/luci-app-aria2 applications/luci-app-watchcat
 
-mv -n openwrt-passwall/* ./ ; rm -Rf openwrt-passwall
-mv -n openwrt-package/* ./ ; rm -Rf openwrt-package
+
 mv -n openwrt-app-actions/applications/* ./;rm -rf openwrt-app-actions
 sed -i \
 -e 's?include \.\./\.\./\(lang\|devel\)?include $(TOPDIR)/feeds/packages/\1?' \
@@ -113,18 +109,10 @@ sed -i \
 
 sed -i 's/luci-lib-ipkg/luci-base/g' luci-app-store/Makefile
 sed -i "/minisign:minisign/d" luci-app-dnscrypt-proxy2/Makefile
-sed -i 's/+dockerd/+dockerd +cgroupfs-mount/' luci-app-docker*/Makefile
-sed -i '$i /etc/init.d/dockerd restart &' luci-app-docker*/root/etc/uci-defaults/*
-sed -i 's/+libcap /+libcap +libcap-bin /' luci-app-openclash/Makefile
 sed -i 's/\(+luci-compat\)/\1 +luci-theme-argon/' luci-app-argon-config/Makefile
 sed -i 's/\(+luci-compat\)/\1 +luci-theme-design/' luci-app-design-config/Makefile
 sed -i 's/\(+luci-compat\)/\1 +luci-theme-argone/' luci-app-argone-config/Makefile
-sed -i 's/ +uhttpd-mod-ubus//' luci-app-packet-capture/Makefile
-sed -i 's/	ip.neighbors/	luci.ip.neighbors/' luci-app-wifidog/luasrc/model/cbi/wifidog/wifidog_cfg.lua
-#sed -i -e 's/nas/services/g' -e 's/NAS/Services/g' $(grep -rl 'nas\|NAS' luci-app-fileassistant)
-#sed -i -e 's/nas/services/g' -e 's/NAS/Services/g' $(grep -rl 'nas\|NAS' luci-app-alist)
 sed -i '65,73d' adguardhome/Makefile
-sed -i 's/PKG_SOURCE_DATE:=2/PKG_SOURCE_DATE:=3/' transmission-web-control/Makefile
 
 exit 0
 
