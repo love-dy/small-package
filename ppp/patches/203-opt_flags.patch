@@ -8,31 +8,25 @@ Signed-off-by: Jo-Philipp Wich <jo@mein.io>
 
 --- a/pppd/plugins/radius/Makefile.linux
 +++ b/pppd/plugins/radius/Makefile.linux
-@@ -47,13 +47,13 @@ install: all
- 	$(INSTALL) -c -m 444 pppd-radattr.8 $(MANDIR)
+@@ -12,7 +12,8 @@ VERSION = $(shell awk -F '"' '/VERSION/
+ INSTALL	= install
  
- radius.so: radius.o libradiusclient.a
--	$(CC) $(LDFLAGS) -o radius.so -shared radius.o libradiusclient.a
-+	$(CC) $(LDFLAGS) -fPIC -o radius.so -shared radius.o libradiusclient.a
+ PLUGIN=radius.so radattr.so radrealms.so
+-CFLAGS=-I. -I../.. -I../../../include -O2 -fPIC -DRC_LOG_FACILITY=LOG_DAEMON
++COPTS = -O2
++CFLAGS=-I. -I../.. -I../../../include $(COPTS) -fPIC -DRC_LOG_FACILITY=LOG_DAEMON
  
- radattr.so: radattr.o
--	$(CC) $(LDFLAGS) -o radattr.so -shared radattr.o
-+	$(CC) $(LDFLAGS) -fPIC -o radattr.so -shared radattr.o
+ # Uncomment the next line to include support for Microsoft's
+ # MS-CHAP authentication protocol.
+--- a/pppdump/Makefile.linux
++++ b/pppdump/Makefile.linux
+@@ -2,7 +2,8 @@ DESTDIR = $(INSTROOT)@DESTDIR@
+ BINDIR = $(DESTDIR)/sbin
+ MANDIR = $(DESTDIR)/share/man/man8
  
- radrealms.so: radrealms.o
--	$(CC) $(LDFLAGS) -o radrealms.so -shared radrealms.o
-+	$(CC) $(LDFLAGS) -fPIC -o radrealms.so -shared radrealms.o
+-CFLAGS= -O -I../include/net
++COPTS = -O
++CFLAGS= $(COPTS) -I../include/net
+ OBJS = pppdump.o bsd-comp.o deflate.o zlib.o
  
- CLIENTOBJS = avpair.o buildreq.o config.o dict.o ip_util.o \
- 	clientid.o sendserver.o lock.o util.o md5.o
---- a/pppd/plugins/pppoe/Makefile.linux
-+++ b/pppd/plugins/pppoe/Makefile.linux
-@@ -38,7 +38,7 @@ debug.o: debug.c
- 	$(CC) $(CFLAGS) -I../../.. -c -o debug.o debug.c
- 
- pppoe.so: plugin.o discovery.o if.o common.o
--	$(CC) $(LDFLAGS) -o pppoe.so -shared plugin.o discovery.o if.o common.o
-+	$(CC) $(LDFLAGS) -fPIC -o pppoe.so -shared plugin.o discovery.o if.o common.o
- 
- install: all
- 	$(INSTALL) -d -m 755 $(LIBDIR)
+ INSTALL= install

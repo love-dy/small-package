@@ -1,3 +1,4 @@
+#!/bin/sh
 # Copyright (C) 2006 OpenWrt.org
 # Copyright (C) 2010 Vertical Communications
 
@@ -18,9 +19,6 @@ preinit_ip_config() {
 	fi
 
 	ip link set dev $netdev up
-	if [ -n "$vid" ]; then
-		ip link set dev $1 up
-	fi
 	ip -4 address add $pi_ip/$pi_netmask broadcast $pi_broadcast dev $1
 }
 
@@ -35,11 +33,6 @@ preinit_config_switch() {
 
 	json_get_vars enable reset
 
-	if [ "$reset" -eq "1" ]; then
-		swconfig dev $name set reset
-	fi
-	swconfig dev $name set enable_vlan $enable
-
 	if json_is_a roles array; then
 		json_get_keys roles roles
 		json_select roles
@@ -50,14 +43,18 @@ preinit_config_switch() {
 			json_select ..
 
 			if [ "$device" = "$lan_if" ]; then
+				if [ "$reset" -eq "1" ]; then
+					swconfig dev $name set reset
+				fi
+
+				swconfig dev $name set enable_vlan $enable
 				swconfig dev $name vlan $role set ports "$ports"
+				swconfig dev $name set apply
 			fi
 		done
 
 		json_select ..
 	fi
-
-	swconfig dev $name set apply
 
 	json_select ..
 	json_select ..
@@ -75,20 +72,14 @@ preinit_config_board() {
 
 	json_select network
 		json_select "lan"
-			json_get_vars device
-			json_get_values ports ports
+			json_get_vars ifname
 		json_select ..
 	json_select ..
 
-	[ -n "$device" -o -n "$ports" ] || return
-
-	# swconfig uses $device and DSA uses ports
-	[ -z "$ports" ] && {
-		ports="$device"
-	}
+	[ -n "$ifname" ] || return
 
 	# only use the first one
-	ifname=${ports%% *}
+	ifname=${ifname%% *}
 
 	if [ -x /sbin/swconfig ]; then
 		# configure the switch, if present
@@ -100,8 +91,6 @@ preinit_config_board() {
 	else
 		# trim any vlan ids
 		ifname=${ifname%\.*}
-		# trim any vlan modifiers like :t
-		ifname=${ifname%\:*}
 	fi
 
 	pi_ifname=$ifname
