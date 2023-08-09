@@ -59,7 +59,6 @@ git clone --depth 1 https://github.com/jerrykuku/luci-theme-argon
 git clone --depth 1 https://github.com/jerrykuku/luci-app-argon-config
 git clone --depth 1 https://github.com/jerrykuku/luci-app-vssr
 git clone --depth 1 https://github.com/jerrykuku/luci-app-ttnode
-git clone --depth 1 https://github.com/jerrykuku/luci-app-jd-dailybonus
 git clone --depth 1 https://github.com/jerrykuku/luci-app-go-aliyundrive-webdav
 git clone --depth 1 https://github.com/jerrykuku/lua-maxminddb
 git clone --depth 1 https://github.com/sirpdboy/luci-app-advanced
