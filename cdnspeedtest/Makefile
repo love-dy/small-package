@@ -5,22 +5,22 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=CloudflareSpeedTest
-PKG_VERSION:=2.2.4
-PKG_RELEASE:=1
+PKG_VERSION:=2.1.0
+PKG_RELEASE:=$(AUTORELEASE)
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://codeload.github.com/XIU2/CloudflareSpeedTest/tar.gz/v$(PKG_VERSION)?
-PKG_HASH:=9025102b4302cc2e7e91e8ed60ce49ca7c5b2494b09f14edfd4e012ea828e61d
+PKG_HASH:=39a4e4a341330746a8bd0a07769663f08d2fcc9c216e52a8b5e40c3e03fe1b6f
 
 PKG_LICENSE:=GPL-3.0-only
-PKG_LICENSE_FILES:=LICENSE
+PKG_LICENSE_FILE:=LICENSE
 PKG_MAINTAINER:=Tianling Shen <cnsztl@immortalwrt.org>
 
 PKG_BUILD_DEPENDS:=golang/host
 PKG_BUILD_PARALLEL:=1
-PKG_BUILD_FLAGS:=no-mips16
+PKG_USE_MIPS16:=0
 
-GO_PKG:=github.com/XIU2/CloudflareSpeedTest
+GO_PKG:=CloudflareSpeedTest
 GO_PKG_LDFLAGS_X:=main.version=v$(PKG_VERSION)
 
 include $(INCLUDE_DIR)/package.mk

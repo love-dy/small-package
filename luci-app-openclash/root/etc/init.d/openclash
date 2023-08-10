@@ -289,48 +289,57 @@ sub_info_get()
    fi
    
    if [ -z "$name" ]; then
-      RAW_CONFIG_FILE="/etc/openclash/config/config.yaml"
+      SUB_CONFIG_FILE="/etc/openclash/config/config.yaml"
    else
-      RAW_CONFIG_FILE="/etc/openclash/config/$name.yaml"
+      SUB_CONFIG_FILE="/etc/openclash/config/$name.yaml"
+   fi
+
+   if [ "$SUB_CONFIG_FILE" != "$2" ]; then
+      return
    fi
    
-   uci -q set openclash.config.config_path="$RAW_CONFIG_FILE"
-   uci -q commit openclash
    subscribe_enable=1
 }
 
 #配置文件选择
 config_choose()
 {
-if [ -z "$RAW_CONFIG_FILE" ] || [ ! -f "$RAW_CONFIG_FILE" ]; then
-   CONFIG_NAME=$(ls -lt /etc/openclash/config/ | grep -E '.yaml|.yml' | head -n 1 |awk '{print $9}')
-   if [ -n "$CONFIG_NAME" ]; then
-      uci -q set openclash.config.config_path="/etc/openclash/config/$CONFIG_NAME"
-      uci -q commit openclash
-      RAW_CONFIG_FILE="/etc/openclash/config/$CONFIG_NAME"
-      CONFIG_FILE="/etc/openclash/$CONFIG_NAME"
-      TMP_CONFIG_FILE="/tmp/yaml_config_tmp_$CONFIG_NAME"
-      
-   fi
-fi 2>/dev/null
-CONFIG_NAME=$(echo "$RAW_CONFIG_FILE" |awk -F '/' '{print $5}' 2>/dev/null)
-HISTORY_PATH_OLD="/etc/openclash/history/${CONFIG_NAME%.*}"
-HISTORY_PATH="/etc/openclash/history/${CONFIG_NAME%.*}.db"
-
 if [ ! -f "$RAW_CONFIG_FILE" ]; then
    config_load "openclash"
-   config_foreach sub_info_get "config_subscribe"
+   config_foreach sub_info_get "config_subscribe" "$RAW_CONFIG_FILE"
    if [ "$subscribe_enable" = "1" ]; then
-      LOG_OUT "Config File Does Not Exist, You Have Set Subscription Information, Ready To Download..."
-      nohup /usr/share/openclash/openclash.sh &
-      del_lock
-      exit 0
-   else
-      LOG_OUT "Error: Config Not Found"
+      LOG_OUT "【$RAW_CONFIG_FILE】Config File Does Not Exist, You Have Set Subscription Information, Ready To Download..."
+      nohup /usr/share/openclash/openclash.sh "$RAW_CONFIG_FILE" &
       del_lock
       exit 0
    fi
 fi
+
+if [ -z "$RAW_CONFIG_FILE" ] || [ ! -f "$RAW_CONFIG_FILE" ]; then
+   for file_name in /etc/openclash/config/*
+   do
+      if [ -f "$file_name" ]; then
+         CONFIG_NAME=$(echo "$file_name" |awk -F '/' '{print $5}' 2>/dev/null)
+         uci -q set openclash.config.config_path="/etc/openclash/config/$CONFIG_NAME"
+         uci -q commit openclash
+         RAW_CONFIG_FILE="/etc/openclash/config/$CONFIG_NAME"
+         CONFIG_FILE="/etc/openclash/$CONFIG_NAME"
+         TMP_CONFIG_FILE="/tmp/yaml_config_tmp_$CONFIG_NAME"
+         LOG_OUT "Error: Config Not Found, Switch Config File to【$RAW_CONFIG_FILE】"
+         break
+      fi
+   done
+fi 2>/dev/null
+
+if [ ! -f "$RAW_CONFIG_FILE" ]; then
+   LOG_OUT "Error: Config Not Found"
+   del_lock
+   exit 0
+fi
+
+CONFIG_NAME=$(echo "$RAW_CONFIG_FILE" |awk -F '/' '{print $5}' 2>/dev/null)
+HISTORY_PATH_OLD="/etc/openclash/history/${CONFIG_NAME%.*}"
+HISTORY_PATH="/etc/openclash/history/${CONFIG_NAME%.*}.db"
 }
 
 config_check()
@@ -1247,8 +1256,6 @@ firewall_redirect_exclude()
 set_tun_tap()
 {
       #启动TUN
-      local type=$1
-
       if [ -z "$1" ]; then
          ip_="ip"
       else
@@ -1258,12 +1265,21 @@ set_tun_tap()
       TUN_WAIT=0
       TUN_RESTART=1
 
-      if [ -n "$(pidof clash)" ] && [ -n "$(ip rule show |grep "fwmark 0x162 lookup 354")" ]; then
-         ip -6 rule del oif utun table 2022 >/dev/null 2>&1
-         ip -6 route del default dev utun table 2022 >/dev/null 2>&1
+      if [ -n "$(pidof clash)" ] && [ -n "$1" ] && [ "$(ip -6 route list |grep utun |wc -l)" -ne 2 ] && [ -n "$(ifconfig utun)" ]; then
+         if [ "$enable_meta_core" = "1" ]; then
+            ifconfig utun inet6 add fdfe:dcba:9876::1/126 >/dev/null 2>&1
+            ip -6 route add fdfe:dcba:9876::/126 dev utun proto kernel metric 256 pref medium >/dev/null 2>&1
+            ip -6 route add fe80::/64 dev utun proto kernel metric 256 pref medium >/dev/null 2>&1
+         fi
          ip -6 route replace default dev utun table "$PROXY_ROUTE_TABLE" >/dev/null 2>&1
          ip -6 rule add fwmark "$PROXY_FWMARK" table "$PROXY_ROUTE_TABLE" >/dev/null 2>&1
-         return
+      fi
+
+      #prevent lost when v6 utun address added
+      if [ -n "$(pidof clash)" ] && [ -z "$(ip route list |grep utun)" ] && [ -n "$(ifconfig utun)" ]; then
+         route add -net "$fakeip_range" dev utun >/dev/null 2>&1
+         ip route replace default dev utun table "$PROXY_ROUTE_TABLE" >/dev/null 2>&1
+         ip rule add fwmark "$PROXY_FWMARK" table "$PROXY_ROUTE_TABLE" >/dev/null 2>&1
       fi
 
       $ip_ link set utun up
@@ -1293,7 +1309,7 @@ set_tun_tap()
          fi
       fi
 
-      if [ -n "$1" ]; then
+      if [ -n "$1" ] && [ "$enable_meta_core" = "1" ]; then
          ip -6 rule del oif utun table 2022 >/dev/null 2>&1
          ip -6 route del default dev utun table 2022 >/dev/null 2>&1
       fi
@@ -2952,6 +2968,7 @@ revert_firewall()
    ip -6 rule del fwmark "$PROXY_FWMARK" table "$PROXY_ROUTE_TABLE" >/dev/null 2>&1
    ip -6 rule del oif utun table 2022 >/dev/null 2>&1
    ip -6 route del default dev utun table 2022 >/dev/null 2>&1
+   ip -6 route del fdfe:dcba:9876::/126 dev utun proto kernel metric 256 >/dev/null 2>&1
    ip -6 link set dev utun down >/dev/null 2>&1
    ip -6 tuntap del utun mode tun >/dev/null 2>&1
 
@@ -3081,6 +3098,7 @@ get_config()
    find_process_mode=$(uci -q get openclash.config.find_process_mode || echo 0)
    upnp_lease_file=$(uci -q get upnpd.config.upnp_lease_file)
    global_client_fingerprint=$(uci -q get openclash.config.global_client_fingerprint || echo "0")
+   enable_unified_delay=$(uci -q get openclash.config.enable_unified_delay || echo "0")
    [ -z "$dns_port" ] && dns_port=7874 && uci -q set openclash.config.dns_port=7874
    uci -q set openclash.config.restricted_mode=0 && uci -q commit openclash
 }
@@ -3108,7 +3126,7 @@ start()
    if ! $quick_start; then
       LOG_OUT "Step 3: Modify The Config File..."
       config_check
-      /usr/share/openclash/yml_change.sh 2>/dev/null "$en_mode" "$da_password" "$cn_port" "$proxy_port" "$TMP_CONFIG_FILE" "$ipv6_enable" "$http_port" "$socks_port" "$log_level" "$proxy_mode" "$en_mode_tun" "$stack_type" "$dns_port" "$mixed_port" "$tproxy_port" "$ipv6_dns" "$store_fakeip" "$stream_domains_prefetch" "$enable_meta_core" "$enable_meta_sniffer" "$enable_geoip_dat" "$geodata_loader" "$enable_meta_sniffer_custom" "$interface_name" "$enable_tcp_concurrent" "$core_type" "$append_default_dns" "$enable_meta_sniffer_pure_ip" "$find_process_mode" "$fakeip_range" "$global_client_fingerprint" "$ipv6_mode" "$stack_type_v6"
+      /usr/share/openclash/yml_change.sh 2>/dev/null "$en_mode" "$da_password" "$cn_port" "$proxy_port" "$TMP_CONFIG_FILE" "$ipv6_enable" "$http_port" "$socks_port" "$log_level" "$proxy_mode" "$en_mode_tun" "$stack_type" "$dns_port" "$mixed_port" "$tproxy_port" "$ipv6_dns" "$store_fakeip" "$stream_domains_prefetch" "$enable_meta_core" "$enable_meta_sniffer" "$enable_geoip_dat" "$geodata_loader" "$enable_meta_sniffer_custom" "$interface_name" "$enable_tcp_concurrent" "$core_type" "$append_default_dns" "$enable_meta_sniffer_pure_ip" "$find_process_mode" "$fakeip_range" "$global_client_fingerprint" "$ipv6_mode" "$stack_type_v6" "$enable_unified_delay"
       /usr/share/openclash/yml_rules_change.sh 2>/dev/null "$rule_source" "$enable_custom_clash_rules" "$TMP_CONFIG_FILE" "$enable_rule_proxy" "$CONFIG_NAME" "$router_self_proxy" "$lan_ip" "$proxy_port" "$tproxy_port" "$enable_meta_core" "$enable_redirect_dns" "$fakeip_range" "$en_mode"
       /usr/share/openclash/openclash_custom_domain_dns.sh >/dev/null 2>&1
       #Custom overwrite
@@ -3134,7 +3152,6 @@ start()
        
    LOG_OUT "Step 7: Set Firewall Rules..."
    set_firewall
-
    LOG_OUT "Step 8: Restart Dnsmasq..."
    change_dns "$enable_redirect_dns" "$disable_masq_cache"
    
