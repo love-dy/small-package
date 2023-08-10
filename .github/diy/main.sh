@@ -17,13 +17,13 @@ mv -n `find $1/* -maxdepth 0 -type d` ./
 rm -rf $1
 }
 
-git clone --depth 1 --single-branch --branch "luci" https://github.com/xiaorouji/openwrt-passwall passwall-luci && mv -n passwall-luci/luci-app-passwall ./ ; rm -rf passwall-luci
-git clone --depth 1 --single-branch --branch "packages" https://github.com/xiaorouji/openwrt-passwall passwall-packages && mv -n passwall-packages/* ./ && rm -rf passwall-packages
-git clone --depth 1 --single-branch --branch "dev" https://github.com/vernesong/OpenClash && mv -n OpenClash/luci-app-openclash ./; rm -rf OpenClash
-git clone --depth 1 --single-branch --branch "master" https://github.com/rufengsuixing/luci-app-adguardhome
+git clone --depth 1 -b luci https://github.com/xiaorouji/openwrt-passwall passwall-luci && mv -n passwall-luci/luci-app-passwall ./ ; rm -rf passwall-luci
+git clone --depth 1 -b packages https://github.com/xiaorouji/openwrt-passwall passwall-packages && mv -n passwall-packages/* ./ && rm -rf passwall-packages
+git clone --depth 1 -b dev https://github.com/vernesong/OpenClash && mv -n OpenClash/luci-app-openclash ./; rm -rf OpenClash
+git clone --depth 1 -b master https://github.com/rufengsuixing/luci-app-adguardhome
 
 git clone --depth=1 https://github.com/pymumu/openwrt-smartdns smartdns
-git clone --depth=1 --single-branch -b lede https://github.com/pymumu/luci-app-smartdns
+git clone --depth=1 -b lede https://github.com/pymumu/luci-app-smartdns
 
 git clone --depth 1 -b 18.06 https://github.com/jerrykuku/luci-theme-argon
 git clone --depth 1 -b 18.06 https://github.com/jerrykuku/luci-app-argon-config
