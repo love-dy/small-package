@@ -219,17 +219,8 @@ git_sparse_clone master "https://github.com/coolsnowwolf/lede" "leanlede" packag
 # Delete duplicated packages
 mv -n luciapp/* ./ ; rm -Rf luciapp
 mv -n lean/* ./ ; rm -Rf lean
-mv -n liep/* ./ ; rm -Rf liep
 mv -n wwan/*/* ./; rm -rf wwan
-mv -n openwrt-app-actions/applications/* ./;rm -rf openwrt-app-actions
 rm -Rf */.git
-for pkg in $(ls -d .github/diy/packages/*); do
-  mv -f $pkg/Makefile.k $pkg/Makefile >/dev/null 2>&1 || true
-done
-cp -rf .github/diy/packages/* ./ || true
-for pkg in $(ls -d .github/diy/packages/*); do
-  mv -f $pkg/Makefile $pkg/Makefile.k >/dev/null 2>&1 || true
-done
 
 
 sed -i \
