@@ -46,6 +46,7 @@ git clone --depth 1 https://github.com/kenzok8/litte && mv -n litte/luci-theme-a
 # git clone --depth 1 https://github.com/jerrykuku/luci-app-jd-dailybonus
 # git clone --depth 1 https://github.com/QiuSimons/openwrt-mos && mv -n openwrt-mos/luci-app-mosdns ./ ; rm -rf openwrt-mos
 # git clone --depth 1 https://github.com/silime/luci-app-xunlei
+# git clone --depth 1 https://github.com/sirpdboy/luci-app-netdata
 
 git clone --depth 1 https://github.com/xiaorouji/openwrt-passwall2 passwall2 && mv -n passwall2/luci-app-passwall2 ./;rm -rf passwall2
 git clone --depth 1 https://github.com/fw876/helloworld && mv -n helloworld/{luci-app-ssr-plus,lua-neturl,redsocks2,v2raya} ./ ; rm -rf helloworld
@@ -112,7 +113,7 @@ git clone --depth 1 https://github.com/sirpdboy/luci-app-partexp
 git clone --depth 1 https://github.com/sirpdboy/chatgpt-web
 
 git clone --depth 1 https://github.com/sirpdboy/netspeedtest speedtest && mv -f speedtest/*/ ./ && rm -rf speedtest
-git clone --depth 1 https://github.com/sirpdboy/luci-app-netdata
+
 git clone --depth 1 https://github.com/KFERMercer/luci-app-tcpdump
 git clone --depth 1 https://github.com/jefferymvp/luci-app-koolproxyR
 git clone --depth 1 https://github.com/wolandmaster/luci-app-rtorrent
@@ -164,7 +165,7 @@ svn export https://github.com/x-wrt/packages/trunk/net/nft-qos
 svn export https://github.com/x-wrt/luci/trunk/applications/luci-app-nft-qos
 svn export https://github.com/Lienol/openwrt-package/branches/other/lean/luci-app-autoreboot
 svn export https://github.com/openwrt/packages/trunk/net/shadowsocks-libev
-svn export https://github.com/kenzok8/jell/trunk/gn
+# svn export https://github.com/kenzok8/jell/trunk/gn
 svn export https://github.com/kenzok8/jell/trunk/luci-app-bridge
 
 svn export https://github.com/Ysurac/openmptcprouter-feeds/trunk/luci-app-iperf
@@ -216,7 +217,7 @@ mv -n applications/* luciapp/; rm -rf applications
 git_sparse_clone master "https://github.com/coolsnowwolf/lede" "leanlede" package/lean package/wwan package/network/services/shellsync
 
 # Delete duplicated packages
-mv -n luciapp/!(luci-app-noddos|luci-app-cshark|luci-app-dnscrypt-proxy|luci-app-https-dns-proxy|luci-app-ssr-mudb-server|luci-app-ledtrig-*) ./ ; rm -Rf luciapp
+mv -n luciapp/* ./ ; rm -Rf luciapp
 mv -n lean/* ./ ; rm -Rf lean
 mv -n liep/* ./ ; rm -Rf liep
 mv -n wwan/*/* ./; rm -rf wwan
