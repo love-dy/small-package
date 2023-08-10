@@ -5,9 +5,9 @@ on:
   #  paths:
   #    - '.github/workflows/wall-test.yml'
   #    - '.github/diy/main.sh'
-  schedule:
-    - cron: 0 */8 * * *
-  repository_dispatch:
+  #schedule:
+  #  - cron: 0 */8 * * *
+  #repository_dispatch:
   workflow_dispatch:
     inputs:
       packages:
